@@ -96,43 +96,6 @@ CodeDojo is a modern, beginner-friendly web application where users learn HTML b
 
 ---
 
-## 📁 Project Structure
-
-```
-codedojo/
-├── assets/
-│   ├── css/
-│   │   ├── style.css          # Main stylesheet
-│   │   └── themes.css         # Dark/light theme styles
-│   └── js/
-│       ├── editor.js          # Code editor functionality
-│       ├── theme.js           # Theme switching
-│       └── practice.js        # Practice management
-│
-├── config/
-│   └── database.php           # Database connection
-│
-├── includes/
-│   ├── header.php             # Reusable header
-│   └── footer.php             # Reusable footer
-│
-├── api/
-│   ├── save_practice.php      # Save practice endpoint
-│   ├── load_practice.php      # Load practice endpoint
-│   ├── delete_practice.php    # Delete practice endpoint
-│   └── get_tasks.php          # Get tasks endpoint
-│
-├── database/
-│   └── schema.sql             # Database schema & sample data
-│
-├── index.php                  # Homepage
-├── editor.php                 # Code editor page
-├── lessons.php                # Lessons & tasks page
-└── my_practice.php            # Saved practices page
-```
-
----
-
 ## 🗄️ Database Schema
 
 ### Tables
