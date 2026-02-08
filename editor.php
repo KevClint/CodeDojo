@@ -140,7 +140,7 @@ include 'includes/header.php';
     </div>
     
     <!-- Preview Panel -->
-    <div class="preview-panel">
+    <div class="preview-panel" id="previewPanel">
         <div class="editor-header">
             <span class="editor-title">Live Preview</span>
             <div class="editor-actions">
@@ -148,6 +148,9 @@ include 'includes/header.php';
                     <span class="material-icons" style="font-size: 16px;">info</span>
                     Press Ctrl+Enter to run
                 </span>
+                <button id="fullscreenBtn" class="btn btn-secondary btn-small">
+                    <span class="material-icons">fullscreen</span>
+                </button>
             </div>
         </div>
         

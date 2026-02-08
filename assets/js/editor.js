@@ -7,12 +7,15 @@ class CodeEditor {
     constructor() {
         this.htmlCode = document.getElementById('htmlCode');
         this.previewFrame = document.getElementById('preview');
+        this.previewPanel = document.getElementById('previewPanel');
+        this.fullscreenBtn = document.getElementById('fullscreenBtn');
         this.runBtn = document.getElementById('runBtn');
         this.resetBtn = document.getElementById('resetBtn');
         this.saveBtn = document.getElementById('saveBtn');
         this.showHintBtn = document.getElementById('showHintBtn');
         this.starterCode = '';
         this.currentTaskId = null;
+        this.isFullscreen = false;
         
         this.init();
     }
@@ -40,6 +43,14 @@ class CodeEditor {
         if (this.showHintBtn) {
             this.showHintBtn.addEventListener('click', () => this.toggleHint());
         }
+        
+        if (this.fullscreenBtn) {
+            this.fullscreenBtn.addEventListener('click', () => this.toggleFullscreen());
+        }
+        
+        // Listen for fullscreen changes
+        document.addEventListener('fullscreenchange', () => this.handleFullscreenChange());
+        document.addEventListener('webkitfullscreenchange', () => this.handleFullscreenChange());
         
         // Auto-run on load
         setTimeout(() => this.runCode(), 500);
@@ -183,6 +194,45 @@ class CodeEditor {
             } else {
                 btn.innerHTML = '<span class="material-icons">lightbulb</span> Show Hint';
             }
+        }
+    }
+    
+    /**
+     * Toggle fullscreen for preview panel
+     */
+    toggleFullscreen() {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+            // Enter fullscreen
+            if (this.previewPanel.requestFullscreen) {
+                this.previewPanel.requestFullscreen();
+            } else if (this.previewPanel.webkitRequestFullscreen) {
+                this.previewPanel.webkitRequestFullscreen();
+            }
+        } else {
+            // Exit fullscreen
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            } else if (document.webkitExitFullscreen) {
+                document.webkitExitFullscreen();
+            }
+        }
+    }
+    
+    /**
+     * Handle fullscreen state changes
+     */
+    handleFullscreenChange() {
+        const isCurrentlyFullscreen = document.fullscreenElement === this.previewPanel || 
+                                      document.webkitFullscreenElement === this.previewPanel;
+        
+        this.isFullscreen = isCurrentlyFullscreen;
+        
+        if (this.isFullscreen) {
+            this.fullscreenBtn.innerHTML = '<span class="material-icons">fullscreen_exit</span>';
+            this.previewPanel.classList.add('fullscreen-active');
+        } else {
+            this.fullscreenBtn.innerHTML = '<span class="material-icons">fullscreen</span>';
+            this.previewPanel.classList.remove('fullscreen-active');
         }
     }
     

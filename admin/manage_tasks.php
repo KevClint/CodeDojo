@@ -107,11 +107,27 @@ if (isset($_GET['edit'])) {
 $lessons = $pdo->query("SELECT * FROM lessons ORDER BY order_num ASC")->fetchAll();
 
 // Get all tasks with lesson info
-$sql = "SELECT pt.*, l.title as lesson_title, l.difficulty 
+$sql = "SELECT pt.*, l.id as lesson_id, l.title as lesson_title, l.difficulty 
         FROM practice_tasks pt 
-        LEFT JOIN lessons l ON pt.lesson_id = l.id 
+        RIGHT JOIN lessons l ON pt.lesson_id = l.id 
         ORDER BY l.order_num ASC, pt.order_num ASC";
 $tasks = $pdo->query($sql)->fetchAll();
+
+// Group tasks by lesson
+$tasksByLesson = [];
+foreach ($tasks as $task) {
+    $lid = $task['lesson_id'];
+    if (!isset($tasksByLesson[$lid])) {
+        $tasksByLesson[$lid] = [
+            'lesson_title' => $task['lesson_title'],
+            'difficulty' => $task['difficulty'],
+            'tasks' => []
+        ];
+    }
+    if ($task['id'] !== null) { // Only add if task actually exists
+        $tasksByLesson[$lid]['tasks'][] = $task;
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -229,7 +245,7 @@ $tasks = $pdo->query($sql)->fetchAll();
                                         <option value="">Select a lesson...</option>
                                         <?php foreach ($lessons as $lesson): ?>
                                             <option value="<?php echo $lesson['id']; ?>" 
-                                                    <?php echo ($editTask['lesson_id'] ?? '') == $lesson['id'] ? 'selected' : ''; ?>>
+                                                    <?php echo ($editTask && $editTask['lesson_id'] == $lesson['id']) ? 'selected' : ''; ?>>
                                                 <?php echo htmlspecialchars($lesson['title']); ?> (<?php echo ucfirst($lesson['difficulty']); ?>)
                                             </option>
                                         <?php endforeach; ?>
@@ -273,16 +289,6 @@ $tasks = $pdo->query($sql)->fetchAll();
                                               placeholder="<!-- HTML starter code or comments to guide students -->"><?php echo htmlspecialchars($editTask['starter_code'] ?? ''); ?></textarea>
                                 </div>
                                 
-                                <div>
-                                    <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
-                                        Order Number <small style="color: var(--text-muted); font-weight: 400;">(Lower numbers appear first)</small>
-                                    </label>
-                                    <input type="number" name="order_num" min="0"
-                                           value="<?php echo htmlspecialchars($editTask['order_num'] ?? '0'); ?>"
-                                           style="width: 200px; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; font-family: 'Inter', sans-serif; background: var(--bg-primary); color: var(--text-primary);"
-                                           placeholder="0">
-                                </div>
-                                
                                 <div style="display: flex; gap: var(--spacing-md); padding-top: var(--spacing-md); border-top: 1px solid var(--border-color);">
                                     <button type="submit" class="btn btn-primary">
                                         <span class="material-icons"><?php echo $editTask ? 'save' : 'add'; ?></span>
@@ -304,66 +310,70 @@ $tasks = $pdo->query($sql)->fetchAll();
                         All Tasks (<?php echo count($tasks); ?>)
                     </h2>
                     
-                    <?php if (empty($tasks)): ?>
+                    <?php if (empty($lessons)): ?>
                         <p style="color: var(--text-secondary); text-align: center; padding: var(--spacing-xl);">
-                            No tasks yet. Create your first task to get started!
+                            No lessons created yet. <a href="manage_lessons.php?action=add">Create a lesson</a> to get started!
                         </p>
                     <?php else: ?>
                         <div style="display: grid; gap: var(--spacing-md);">
-                            <?php 
-                            $currentLesson = null;
-                            foreach ($tasks as $task): 
-                                if ($currentLesson !== $task['lesson_title']):
-                                    if ($currentLesson !== null) echo '</div>';
-                                    $currentLesson = $task['lesson_title'];
-                            ?>
-                                <div style="margin-top: <?php echo $currentLesson === $task['lesson_title'] ? '0' : 'var(--spacing-lg)'; ?>;">
+                            <?php foreach ($lessons as $lesson): ?>
+                                <div>
                                     <h3 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: var(--spacing-sm); display: flex; align-items: center; gap: var(--spacing-sm);">
                                         <span class="material-icons" style="font-size: 20px; color: var(--color-primary);">book</span>
-                                        <?php echo htmlspecialchars($task['lesson_title']); ?>
-                                        <span class="task-difficulty <?php echo $task['difficulty']; ?>" style="margin-left: 8px;">
-                                            <?php echo ucfirst($task['difficulty']); ?>
+                                        <?php echo htmlspecialchars($lesson['title']); ?>
+                                        <span class="task-difficulty <?php echo $lesson['difficulty']; ?>" style="margin-left: 8px;">
+                                            <?php echo ucfirst($lesson['difficulty']); ?>
                                         </span>
                                     </h3>
-                                    <div style="display: grid; gap: var(--spacing-sm);">
-                            <?php endif; ?>
-                            
-                                        <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: var(--spacing-md);">
-                                            <div style="display: flex; justify-content: space-between; align-items: start; gap: var(--spacing-md);">
-                                                <div style="flex: 1;">
-                                                    <div style="display: flex; align-items: center; gap: var(--spacing-sm); margin-bottom: var(--spacing-xs);">
-                                                        <span style="color: var(--text-muted); font-size: 13px;">Order: <?php echo $task['order_num']; ?></span>
-                                                    </div>
-                                                    <h4 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: var(--spacing-xs);">
-                                                        <?php echo htmlspecialchars($task['title']); ?>
-                                                    </h4>
-                                                    <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: var(--spacing-sm); line-height: 1.5;">
-                                                        <?php echo htmlspecialchars($task['instruction']); ?>
-                                                    </p>
-                                                    <?php if ($task['hint']): ?>
-                                                        <div style="background: var(--bg-primary); border-left: 3px solid var(--color-info); padding: 8px 12px; border-radius: 4px; font-size: 13px; color: var(--text-secondary);">
-                                                            💡 <strong>Hint:</strong> <?php echo htmlspecialchars(substr($task['hint'], 0, 80)) . (strlen($task['hint']) > 80 ? '...' : ''); ?>
-                                                        </div>
-                                                    <?php endif; ?>
-                                                </div>
-                                                <div style="display: flex; gap: 8px;">
-                                                    <a href="?edit=<?php echo $task['id']; ?>" class="btn btn-secondary btn-small">
-                                                        <span class="material-icons">edit</span>
-                                                    </a>
-                                                    <form method="POST" action="" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this task?');">
-                                                        <input type="hidden" name="action" value="delete">
-                                                        <input type="hidden" name="id" value="<?php echo $task['id']; ?>">
-                                                        <button type="submit" class="btn btn-danger btn-small">
-                                                            <span class="material-icons">delete</span>
-                                                        </button>
-                                                    </form>
-                                                </div>
-                                            </div>
+                                    
+                                    <?php 
+                                    $lessonTasks = $tasksByLesson[$lesson['id']]['tasks'] ?? [];
+                                    if (empty($lessonTasks)): 
+                                    ?>
+                                        <div style="background: var(--bg-tertiary); border: 1px dashed var(--border-color); border-radius: 8px; padding: var(--spacing-md); text-align: center; margin-bottom: var(--spacing-md);">
+                                            <p style="color: var(--text-muted); margin-bottom: 12px;">No tasks yet for this lesson</p>
+                                            <a href="?action=add" class="btn btn-primary btn-small">
+                                                <span class="material-icons">add</span>
+                                                Add First Task
+                                            </a>
                                         </div>
-                            
-                            <?php endforeach; ?>
-                                    </div>
+                                    <?php else: ?>
+                                        <div style="display: grid; gap: var(--spacing-sm); margin-bottom: var(--spacing-lg);">
+                                            <?php foreach ($lessonTasks as $task): ?>
+                                                <div style="background: var(--bg-tertiary); border: 1px solid var(--border-color); border-radius: 8px; padding: var(--spacing-md);">
+                                                    <div style="display: flex; justify-content: space-between; align-items: start; gap: var(--spacing-md);">
+                                                        <div style="flex: 1;">
+                                                            <h4 style="font-size: 16px; font-weight: 600; color: var(--text-primary); margin-bottom: var(--spacing-xs);">
+                                                                <?php echo htmlspecialchars($task['title']); ?>
+                                                            </h4>
+                                                            <p style="font-size: 14px; color: var(--text-secondary); margin-bottom: var(--spacing-sm); line-height: 1.5;">
+                                                                <?php echo htmlspecialchars($task['instruction']); ?>
+                                                            </p>
+                                                            <?php if ($task['hint']): ?>
+                                                                <div style="background: var(--bg-primary); border-left: 3px solid var(--color-info); padding: 8px 12px; border-radius: 4px; font-size: 13px; color: var(--text-secondary);">
+                                                                    💡 <strong>Hint:</strong> <?php echo htmlspecialchars(substr($task['hint'], 0, 80)) . (strlen($task['hint']) > 80 ? '...' : ''); ?>
+                                                                </div>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                        <div style="display: flex; gap: 8px;">
+                                                            <a href="?edit=<?php echo $task['id']; ?>" class="btn btn-secondary btn-small">
+                                                                <span class="material-icons">edit</span>
+                                                            </a>
+                                                            <form method="POST" action="" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this task?');">
+                                                                <input type="hidden" name="action" value="delete">
+                                                                <input type="hidden" name="id" value="<?php echo $task['id']; ?>">
+                                                                <button type="submit" class="btn btn-danger btn-small">
+                                                                    <span class="material-icons">delete</span>
+                                                                </button>
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endforeach; ?>
+                                        </div>
+                                    <?php endif; ?>
                                 </div>
+                            <?php endforeach; ?>
                         </div>
                     <?php endif; ?>
                 </div>

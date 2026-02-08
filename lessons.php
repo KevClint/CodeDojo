@@ -26,6 +26,7 @@ try {
         $stmt->execute([':lesson_id' => $lesson['id']]);
         $lesson['tasks'] = $stmt->fetchAll();
     }
+    unset($lesson); // Clear the reference to avoid issues with later loops
     
 } catch (Exception $e) {
     error_log("Error loading lessons: " . $e->getMessage());

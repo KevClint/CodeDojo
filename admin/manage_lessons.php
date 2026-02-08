@@ -24,6 +24,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $difficulty = $_POST['difficulty'] ?? 'beginner';
         $order_num = intval($_POST['order_num'] ?? 0);
         
+        // Validate difficulty level
+        $valid_difficulties = ['beginner', 'intermediate', 'advanced'];
+        if (!in_array($difficulty, $valid_difficulties)) {
+            $difficulty = 'beginner';
+        }
+        
         if (!empty($title)) {
             try {
                 $sql = "INSERT INTO lessons (title, description, difficulty, order_num) VALUES (:title, :description, :difficulty, :order_num)";
@@ -50,6 +56,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $description = trim($_POST['description'] ?? '');
         $difficulty = $_POST['difficulty'] ?? 'beginner';
         $order_num = intval($_POST['order_num'] ?? 0);
+        
+        // Validate difficulty level
+        $valid_difficulties = ['beginner', 'intermediate', 'advanced'];
+        if (!in_array($difficulty, $valid_difficulties)) {
+            $difficulty = 'beginner';
+        }
         
         if ($id > 0 && !empty($title)) {
             try {
@@ -224,22 +236,12 @@ $lessons = $pdo->query($sql)->fetchAll();
                                         <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
                                             Difficulty Level
                                         </label>
-                                        <select name="difficulty" 
+                                        <select name="difficulty" required
                                                 style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; font-family: 'Inter', sans-serif; background: var(--bg-primary); color: var(--text-primary);">
-                                            <option value="beginner" <?php echo ($editLesson['difficulty'] ?? '') === 'beginner' ? 'selected' : ''; ?>>Beginner</option>
-                                            <option value="intermediate" <?php echo ($editLesson['difficulty'] ?? '') === 'intermediate' ? 'selected' : ''; ?>>Intermediate</option>
-                                            <option value="advanced" <?php echo ($editLesson['difficulty'] ?? '') === 'advanced' ? 'selected' : ''; ?>>Advanced</option>
+                                            <option value="beginner" <?php echo (!$editLesson || ($editLesson['difficulty'] ?? '') === 'beginner') ? 'selected' : ''; ?>>Beginner</option>
+                                            <option value="intermediate" <?php echo ($editLesson && ($editLesson['difficulty'] ?? '') === 'intermediate') ? 'selected' : ''; ?>>Intermediate</option>
+                                            <option value="advanced" <?php echo ($editLesson && ($editLesson['difficulty'] ?? '') === 'advanced') ? 'selected' : ''; ?>>Advanced</option>
                                         </select>
-                                    </div>
-                                    
-                                    <div>
-                                        <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-primary);">
-                                            Order Number
-                                        </label>
-                                        <input type="number" name="order_num" min="0"
-                                               value="<?php echo htmlspecialchars($editLesson['order_num'] ?? '0'); ?>"
-                                               style="width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; font-size: 16px; font-family: 'Inter', sans-serif; background: var(--bg-primary); color: var(--text-primary);"
-                                               placeholder="Display order">
                                     </div>
                                 </div>
                                 
@@ -273,7 +275,6 @@ $lessons = $pdo->query($sql)->fetchAll();
                             <table style="width: 100%; border-collapse: collapse;">
                                 <thead>
                                     <tr style="border-bottom: 2px solid var(--border-color);">
-                                        <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-primary);">Order</th>
                                         <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-primary);">Title</th>
                                         <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-primary);">Difficulty</th>
                                         <th style="padding: 12px; text-align: left; font-weight: 600; color: var(--text-primary);">Tasks</th>
@@ -284,7 +285,6 @@ $lessons = $pdo->query($sql)->fetchAll();
                                 <tbody>
                                     <?php foreach ($lessons as $lesson): ?>
                                         <tr style="border-bottom: 1px solid var(--border-color);">
-                                            <td style="padding: 12px; color: var(--text-secondary);"><?php echo $lesson['order_num']; ?></td>
                                             <td style="padding: 12px;">
                                                 <div style="font-weight: 600; color: var(--text-primary); margin-bottom: 4px;">
                                                     <?php echo htmlspecialchars($lesson['title']); ?>
