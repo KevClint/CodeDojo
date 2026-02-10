@@ -2,6 +2,7 @@
     </div>
     
     <!-- JavaScript Files -->
+    <script src="assets/js/nav.js"></script>
     <script src="assets/js/theme.js"></script>
     <?php if (isset($includeEditor) && $includeEditor): ?>
         <script src="assets/js/editor.js"></script>

@@ -10,16 +10,118 @@ $currentPage = 'home';
 include 'includes/header.php';
 ?>
 
-<div style="padding: var(--spacing-xl); max-width: 1200px; margin: 0 auto;">
+<style>
+    .home {
+        padding: var(--spacing-xl);
+        max-width: 1200px;
+        margin: 0 auto;
+    }
+    .home-hero {
+        text-align: center;
+        padding: var(--spacing-xl) 0;
+        margin-bottom: var(--spacing-xl);
+    }
+    .home-hero h1 {
+        font-size: 48px;
+        font-weight: 700;
+        color: var(--color-primary);
+        margin-bottom: var(--spacing-md);
+    }
+    .home-hero p {
+        font-size: 20px;
+        color: var(--text-secondary);
+        margin-bottom: var(--spacing-lg);
+        max-width: 600px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .home-hero-actions {
+        display: flex;
+        gap: var(--spacing-md);
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .home-features {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: var(--spacing-lg);
+        margin-bottom: var(--spacing-xl);
+    }
+    .home-cta {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        padding: var(--spacing-xl);
+        border-radius: var(--border-radius-lg);
+        color: white;
+        text-align: center;
+    }
+    .home-stats {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: var(--spacing-md);
+        margin-top: var(--spacing-xl);
+        text-align: center;
+    }
+    @media (max-width: 768px) {
+        .home {
+            padding: var(--spacing-lg);
+        }
+        .home-hero {
+            padding: var(--spacing-lg) 0;
+        }
+        .home-hero h1 {
+            font-size: 32px;
+        }
+        .home-hero p {
+            font-size: 16px;
+        }
+        .home-hero-actions {
+            flex-direction: column;
+            align-items: stretch;
+        }
+        .home-hero-actions .btn {
+            width: 100%;
+            justify-content: center;
+        }
+        .home-features {
+            grid-template-columns: 1fr;
+            gap: var(--spacing-md);
+        }
+        .home-cta {
+            padding: var(--spacing-lg);
+        }
+        .home-cta h2 {
+            font-size: 24px;
+        }
+        .home-cta p {
+            font-size: 16px;
+        }
+        .home-stats {
+            grid-template-columns: 1fr;
+        }
+    }
+    @media (max-width: 480px) {
+        .home {
+            padding: var(--spacing-md);
+        }
+        .home-hero h1 {
+            font-size: 28px;
+        }
+        .home-hero p {
+            font-size: 15px;
+        }
+    }
+</style>
+
+<div class="home">
     <!-- Hero Section -->
-    <div style="text-align: center; padding: var(--spacing-xl) 0; margin-bottom: var(--spacing-xl);">
-        <h1 style="font-size: 48px; font-weight: 700; color: var(--color-primary); margin-bottom: var(--spacing-md);">
+    <div class="home-hero">
+        <h1>
             🥋 Welcome to CodeDojo
         </h1>
-        <p style="font-size: 20px; color: var(--text-secondary); margin-bottom: var(--spacing-lg); max-width: 600px; margin-left: auto; margin-right: auto;">
+        <p>
             Master HTML through hands-on practice. Write code, see results instantly, and build your skills one challenge at a time.
         </p>
-        <div style="display: flex; gap: var(--spacing-md); justify-content: center; flex-wrap: wrap;">
+        <div class="home-hero-actions">
             <a href="editor.php" class="btn btn-primary" style="font-size: 16px; padding: 12px 24px;">
                 <span class="material-icons">code</span>
                 Start Coding Now
@@ -32,7 +134,7 @@ include 'includes/header.php';
     </div>
     
     <!-- Features Grid -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--spacing-lg); margin-bottom: var(--spacing-xl);">
+    <div class="home-features">
         <!-- Feature 1 -->
         <div style="background: var(--bg-primary); padding: var(--spacing-lg); border-radius: var(--border-radius-lg); border: 1px solid var(--border-color);">
             <div style="width: 64px; height: 64px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: var(--border-radius-lg); display: flex; align-items: center; justify-content: center; margin-bottom: var(--spacing-md);">
@@ -113,7 +215,7 @@ include 'includes/header.php';
     </div>
     
     <!-- Getting Started Section -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: var(--spacing-xl); border-radius: var(--border-radius-lg); color: white; text-align: center;">
+    <div class="home-cta">
         <h2 style="font-size: 32px; font-weight: 700; margin-bottom: var(--spacing-md);">
             Ready to Start Your Journey?
         </h2>
@@ -127,7 +229,7 @@ include 'includes/header.php';
     </div>
     
     <!-- Quick Stats -->
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--spacing-md); margin-top: var(--spacing-xl); text-align: center;">
+    <div class="home-stats">
         <?php
         // Get quick stats from database
         try {

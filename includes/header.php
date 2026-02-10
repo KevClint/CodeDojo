@@ -141,12 +141,16 @@
                 </div>
             </nav>
         </aside>
+        <div class="sidebar-overlay" id="sidebarOverlay"></div>
         
         <!-- Main Content -->
         <main class="main-content">
             <!-- Top Header -->
             <header class="top-header">
                 <div class="header-left">
+                    <button id="sidebarToggle" class="sidebar-toggle" aria-label="Open menu" title="Open menu">
+                        <span class="material-icons">menu</span>
+                    </button>
                     <h1><?php echo $pageTitle ?? 'CodeDojo'; ?></h1>
                 </div>
                 <div class="header-right">
