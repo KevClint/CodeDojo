@@ -67,6 +67,7 @@ CREATE TABLE practice_tasks (
     hint TEXT,
     starter_code TEXT,
     solution_code TEXT,
+    grading_rules TEXT NULL,
     order_num INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE,
@@ -76,15 +77,55 @@ CREATE TABLE practice_tasks (
 -- User practice: saved work and attempts
 CREATE TABLE user_practice (
     id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NULL,
     title VARCHAR(255) NOT NULL,
     html_code TEXT NOT NULL,
     task_id INT NULL,
     is_completed BOOLEAN DEFAULT FALSE,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE SET NULL,
     FOREIGN KEY (task_id) REFERENCES practice_tasks(id) ON DELETE SET NULL,
+    INDEX idx_user (user_id),
     INDEX idx_created (created_at),
     INDEX idx_task (task_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- User task progress: attempts, completion, and best score per task
+CREATE TABLE user_task_progress (
+    user_id INT NOT NULL,
+    task_id INT NOT NULL,
+    attempts INT NOT NULL DEFAULT 0,
+    passes INT NOT NULL DEFAULT 0,
+    best_score INT NOT NULL DEFAULT 0,
+    last_attempt_at TIMESTAMP NULL DEFAULT NULL,
+    completed_at TIMESTAMP NULL DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, task_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (task_id) REFERENCES practice_tasks(id) ON DELETE CASCADE,
+    INDEX idx_task_progress_task (task_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- User daily activity: used for streak calculations
+CREATE TABLE user_daily_activity (
+    user_id INT NOT NULL,
+    activity_date DATE NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, activity_date),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- User lesson badges: lesson mastery completion record
+CREATE TABLE user_lesson_badges (
+    user_id INT NOT NULL,
+    lesson_id INT NOT NULL,
+    awarded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, lesson_id),
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (lesson_id) REFERENCES lessons(id) ON DELETE CASCADE,
+    INDEX idx_badge_lesson (lesson_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- ============================================================================
@@ -178,6 +219,241 @@ INSERT INTO practice_tasks (lesson_id, title, instruction, hint, starter_code, o
  '<!-- Build semantic structure -->\n\n',
  1);
 
+
+-- ============================================================================
+-- ADDITIONAL LESSONS & PRACTICE TASKS (EXPANDED CURRICULUM)
+-- ============================================================================
+
+INSERT INTO lessons (title, description, difficulty, order_num) VALUES
+('HTML Document Structure', 'Build complete HTML5 document foundations', 'beginner', 7),
+('Semantic Text & Accessibility', 'Write readable, accessible text content', 'beginner', 8),
+('Navigation & Site Structure', 'Create navigation menus and multi-section layouts', 'beginner', 9),
+('Media Embeds', 'Embed audio, video, and external content', 'intermediate', 10),
+('Advanced Tables', 'Build structured, accessible data tables', 'intermediate', 11),
+('Form Validation Basics', 'Use built-in HTML validation features', 'intermediate', 12),
+('Form UX Patterns', 'Improve form usability and clarity', 'intermediate', 13),
+('Page Sections & Landmarks', 'Use semantic landmarks for page architecture', 'intermediate', 14),
+('Metadata & SEO Basics', 'Improve discoverability with metadata', 'intermediate', 15),
+('Responsive HTML Patterns', 'Create HTML structures that adapt well', 'advanced', 16),
+('Accessible Components', 'Create components with better accessibility', 'advanced', 17),
+('Portfolio Project Tasks', 'Combine concepts into mini project pages', 'advanced', 18);
+
+INSERT INTO practice_tasks (lesson_id, title, instruction, hint, starter_code, order_num) VALUES
+(7, 'Create a Valid HTML5 Skeleton',
+ 'Write a full HTML5 document with doctype, html, head, title, and body.',
+ 'Start with <!DOCTYPE html> and include the core structural tags.',
+ '<!-- Build a full document skeleton -->\n\n',
+ 1),
+
+(7, 'Add Meta Charset and Viewport',
+ 'Create the head section with charset and viewport meta tags plus a title.',
+ 'Use <meta charset="UTF-8"> and viewport content="width=device-width, initial-scale=1.0".',
+ '<!-- Create your <head> metadata -->\n\n',
+ 2),
+
+(7, 'Build a Multi-Section Body',
+ 'Inside body, add header, main, and footer with sample text.',
+ 'Use semantic section tags instead of generic divs.',
+ '<!-- Add header, main, and footer -->\n\n',
+ 3),
+
+(8, 'Use Strong and Emphasis Correctly',
+ 'Write a paragraph with one important word and one emphasized phrase.',
+ 'Use <strong> for importance and <em> for emphasis.',
+ '<p><!-- Write your paragraph here --></p>\n',
+ 1),
+
+(8, 'Create Accessible Abbreviation',
+ 'Use an abbreviation tag for HTML and provide its full meaning.',
+ 'Use <abbr title="HyperText Markup Language">HTML</abbr>.',
+ '<!-- Add your abbreviation example -->\n\n',
+ 2),
+
+(8, 'Mark Up a Quote with Citation',
+ 'Add a blockquote and a citation line for the source.',
+ 'Use <blockquote> and <cite> together.',
+ '<!-- Add quote and citation -->\n\n',
+ 3),
+
+(9, 'Build a Navigation Menu',
+ 'Create a nav section with at least 4 links: Home, About, Lessons, Contact.',
+ 'Wrap your links inside <nav> and keep link text clear.',
+ '<!-- Build your nav menu -->\n\n',
+ 1),
+
+(9, 'Create Jump Links',
+ 'Build a mini table of contents with links that jump to sections on the same page.',
+ 'Use href="#section-id" and matching id attributes.',
+ '<!-- Create internal anchor links -->\n\n',
+ 2),
+
+(9, 'Add Breadcrumb Navigation',
+ 'Create a breadcrumb trail like Home > Lessons > HTML Basics.',
+ 'Use nav + ordered list for accessible breadcrumbs.',
+ '<!-- Build breadcrumbs -->\n\n',
+ 3),
+
+(10, 'Embed an Audio Player',
+ 'Add an audio element with controls and a fallback message.',
+ 'Use <audio controls> with a nested <source>.',
+ '<!-- Add audio player -->\n\n',
+ 1),
+
+(10, 'Embed a Video Player',
+ 'Add a video element with controls and poster image placeholder.',
+ 'Use <video controls width="..."> and include source type.',
+ '<!-- Add video player -->\n\n',
+ 2),
+
+(10, 'Add an Embedded Map Frame',
+ 'Insert an iframe placeholder for a map and include a meaningful title attribute.',
+ 'Use <iframe title="..."> for accessibility.',
+ '<!-- Add iframe embed -->\n\n',
+ 3),
+
+(11, 'Create Table Caption and Head',
+ 'Build a table with caption, thead, tbody, and at least 3 columns.',
+ 'Use semantic table grouping elements.',
+ '<!-- Build structured table -->\n\n',
+ 1),
+
+(11, 'Use Rowspan and Colspan',
+ 'Create a small schedule table using rowspan or colspan at least once.',
+ 'Merge cells with rowspan/colspan where it makes sense.',
+ '<!-- Create merged-cell table -->\n\n',
+ 2),
+
+(11, 'Mark Header Scope',
+ 'Create a data table with th elements that include proper scope attributes.',
+ 'Use scope="col" and scope="row" where appropriate.',
+ '<!-- Add scoped headers -->\n\n',
+ 3),
+
+(12, 'Required Form Inputs',
+ 'Build a form with name and email inputs that are both required.',
+ 'Use required attribute on each required field.',
+ '<!-- Add required inputs -->\n\n',
+ 1),
+
+(12, 'Pattern Validation',
+ 'Add a phone input validated by a pattern attribute.',
+ 'Example pattern: [0-9]{3}-[0-9]{3}-[0-9]{4}',
+ '<!-- Add pattern-validated input -->\n\n',
+ 2),
+
+(12, 'Length Constraints',
+ 'Add a username input with minlength and maxlength constraints.',
+ 'Use minlength="4" and maxlength="16" as a starting point.',
+ '<!-- Add constrained input -->\n\n',
+ 3),
+
+(13, 'Label Every Input',
+ 'Create a form where each input is correctly associated with a label.',
+ 'Match label for="..." to input id="...".',
+ '<!-- Build labeled form -->\n\n',
+ 1),
+
+(13, 'Group Inputs with Fieldset',
+ 'Create a form section for contact preferences using fieldset and legend.',
+ 'Use radio buttons inside a fieldset.',
+ '<!-- Add fieldset group -->\n\n',
+ 2),
+
+(13, 'Use Helpful Placeholder and Help Text',
+ 'Add one input with placeholder and a small helper description below it.',
+ 'Use concise placeholder text and a separate hint paragraph.',
+ '<!-- Build helper text pattern -->\n\n',
+ 3),
+
+(14, 'Build a Semantic Landing Structure',
+ 'Create header, nav, main, aside, and footer sections in one page.',
+ 'Treat each section as a meaningful page landmark.',
+ '<!-- Build semantic layout -->\n\n',
+ 1),
+
+(14, 'Article with Nested Sections',
+ 'Create an article containing at least two nested section elements.',
+ 'Use section headings for structure clarity.',
+ '<!-- Build article with sections -->\n\n',
+ 2),
+
+(14, 'Main Content with Supporting Aside',
+ 'Build main content and an aside with related links.',
+ 'Avoid placing primary content inside aside.',
+ '<!-- Build main + aside -->\n\n',
+ 3),
+
+(15, 'Add SEO Meta Description',
+ 'Create a head block with title and meta description.',
+ 'Keep the description concise and specific.',
+ '<!-- Add title + description meta -->\n\n',
+ 1),
+
+(15, 'Add Open Graph Basics',
+ 'Add basic Open Graph tags: og:title, og:description, og:type.',
+ 'Use <meta property="og:..." content="..."> tags.',
+ '<!-- Add Open Graph meta tags -->\n\n',
+ 2),
+
+(15, 'Canonical Link Tag',
+ 'Add a canonical URL link element in the head section.',
+ 'Use <link rel="canonical" href="https://example.com/page">.',
+ '<!-- Add canonical link -->\n\n',
+ 3),
+
+(16, 'Picture Element for Responsive Images',
+ 'Use picture with at least one source and fallback img.',
+ 'Provide different source media conditions.',
+ '<!-- Build picture element -->\n\n',
+ 1),
+
+(16, 'Responsive Data Card Markup',
+ 'Create semantic card markup with image, heading, text, and action link.',
+ 'Use article for the card container.',
+ '<!-- Build responsive card HTML -->\n\n',
+ 2),
+
+(16, 'Content Priority Structure',
+ 'Create a page where important content appears first in the HTML order.',
+ 'Think mobile-first content order in markup.',
+ '<!-- Build content-priority markup -->\n\n',
+ 3),
+
+(17, 'Accessible Button Group',
+ 'Create a group of action buttons with clear accessible names.',
+ 'Use explicit text labels and logical grouping.',
+ '<!-- Build accessible button group -->\n\n',
+ 1),
+
+(17, 'Accessible Form Error Message Area',
+ 'Add an error summary container and link it to an input using aria-describedby.',
+ 'Use unique ids and readable error text.',
+ '<!-- Build accessible error pattern -->\n\n',
+ 2),
+
+(17, 'Keyboard-Friendly Dialog Markup',
+ 'Create HTML structure for a dialog with title, content, and close button.',
+ 'Use role="dialog" and aria-labelledby attributes.',
+ '<!-- Build dialog markup -->\n\n',
+ 3),
+
+(18, 'Portfolio Hero Section',
+ 'Build a portfolio hero section with name, tagline, and call-to-action links.',
+ 'Use heading hierarchy and semantic sections.',
+ '<!-- Build portfolio hero -->\n\n',
+ 1),
+
+(18, 'Project Showcase Grid Markup',
+ 'Create markup for at least 3 project cards with title, description, and link.',
+ 'Use article elements for each project item.',
+ '<!-- Build project showcase -->\n\n',
+ 2),
+
+(18, 'Contact Section with Form and Social Links',
+ 'Add a final contact section that includes a simple form and social links list.',
+ 'Include labels and accessible link text.',
+ '<!-- Build contact section -->\n\n',
+ 3);
 -- ============================================================================
 -- INSERT SAMPLE USER PRACTICES
 -- ============================================================================
@@ -202,3 +478,4 @@ INSERT INTO user_practice (title, html_code, is_completed) VALUES
 --
 -- You can now access your CodeDojo application!
 -- ============================================================================
+

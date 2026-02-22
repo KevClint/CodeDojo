@@ -7,6 +7,10 @@
 header('Content-Type: application/json');
 require_once '../config/database.php';
 
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Only accept POST requests
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode([
@@ -39,13 +43,15 @@ try {
         exit;
     }
     
-    // Connect to database
     $pdo = getDBConnection();
-    
+    $userId = (isset($_SESSION['user_id']) && is_numeric($_SESSION['user_id'])) ? (int) $_SESSION['user_id'] : null;
+
     // Insert practice
-    $sql = "INSERT INTO user_practice (title, html_code, task_id) VALUES (:title, :html_code, :task_id)";
+    $sql = "INSERT INTO user_practice (user_id, title, html_code, task_id, is_completed) 
+            VALUES (:user_id, :title, :html_code, :task_id, 0)";
     $stmt = $pdo->prepare($sql);
     $stmt->execute([
+        ':user_id' => $userId,
         ':title' => $title,
         ':html_code' => $html_code,
         ':task_id' => $task_id
@@ -60,7 +66,7 @@ try {
         'id' => $insertId
     ]);
     
-} catch (PDOException $e) {
+} catch (Throwable $e) {
     error_log("Save Practice Error: " . $e->getMessage());
     
     echo json_encode([

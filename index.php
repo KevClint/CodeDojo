@@ -14,7 +14,7 @@ include 'includes/header.php';
     <!-- Hero Section -->
     <div style="text-align: center; padding: var(--spacing-xl) 0; margin-bottom: var(--spacing-xl);">
         <h1 style="font-size: 48px; font-weight: 700; color: var(--color-primary); margin-bottom: var(--spacing-md);">
-            🥋 Welcome to CodeDojo
+            &#x1F94B; Welcome to CodeDojo
         </h1>
         <p style="font-size: 20px; color: var(--text-secondary); margin-bottom: var(--spacing-lg); max-width: 600px; margin-left: auto; margin-right: auto;">
             Master HTML through hands-on practice. Write code, see results instantly, and build your skills one challenge at a time.
@@ -42,7 +42,7 @@ include 'includes/header.php';
                 Live Preview
             </h3>
             <p style="color: var(--text-secondary); line-height: 1.6;">
-                See your HTML code come to life instantly. Write on the left, preview on the right – no refresh needed.
+                See your HTML code come to life instantly. Write on the left, preview on the right - no refresh needed.
             </p>
         </div>
         
@@ -118,7 +118,7 @@ include 'includes/header.php';
             Ready to Start Your Journey?
         </h2>
         <p style="font-size: 18px; margin-bottom: var(--spacing-lg); opacity: 0.9; max-width: 600px; margin-left: auto; margin-right: auto;">
-            Join CodeDojo today and learn HTML through practice. No lectures, no boring theory – just you, your code, and instant results.
+            Join CodeDojo today and learn HTML through practice. No lectures, no boring theory - just you, your code, and instant results.
         </p>
         <a href="editor.php" class="btn" style="background: white; color: #667eea; font-size: 16px; padding: 12px 32px; font-weight: 600;">
             <span class="material-icons">play_arrow</span>
@@ -174,3 +174,4 @@ include 'includes/header.php';
 </div>
 
 <?php include 'includes/footer.php'; ?>
+

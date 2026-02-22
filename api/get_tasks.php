@@ -63,7 +63,7 @@ try {
         ]);
     }
     
-} catch (PDOException $e) {
+} catch (Throwable $e) {
     error_log("Get Tasks Error: " . $e->getMessage());
     
     echo json_encode([

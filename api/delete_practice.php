@@ -54,7 +54,7 @@ try {
         'message' => 'Practice deleted successfully'
     ]);
     
-} catch (PDOException $e) {
+} catch (Throwable $e) {
     error_log("Delete Practice Error: " . $e->getMessage());
     
     echo json_encode([

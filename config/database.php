@@ -25,14 +25,9 @@ function getDBConnection() {
         return $pdo;
         
     } catch (PDOException $e) {
-        // Log error (in production, log to file instead)
+        // Let callers decide whether to render HTML or JSON.
         error_log("Database Connection Error: " . $e->getMessage());
-        
-        // User-friendly error message
-        die(json_encode([
-            'success' => false,
-            'message' => 'Database connection failed. Please check your configuration.'
-        ]));
+        throw $e;
     }
 }
 

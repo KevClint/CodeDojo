@@ -632,3 +632,411 @@ body {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--text-muted);
 }
+
+/* ============================================
+   LIVE PLAYGROUND
+   ============================================ */
+.playground-shell {
+    height: calc(100vh - 70px);
+    display: flex;
+    padding: 12px;
+    background: #131417;
+    min-height: 0;
+}
+
+.lesson-workspace {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    display: flex;
+    gap: 12px;
+}
+
+.lesson-panel {
+    flex: 0 0 350px;
+    width: 350px;
+    min-height: 0;
+    overflow-y: auto;
+    background: #1e1e2e;
+    color: #cdd6f4;
+    border: 1px solid #313244;
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+}
+
+.editor-area {
+    flex: 1;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.playground-toolbar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 8px;
+    background: #1f2128;
+    border: 1px solid #2d313c;
+    border-radius: 10px;
+    padding: 8px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.playground-toolbar-left,
+.playground-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.playground-toolbar .btn {
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 10px;
+    border: 1px solid #363b49;
+}
+
+.playground-toolbar .btn-secondary {
+    background: #2a2f3a;
+    color: #e5e7eb;
+}
+
+.playground-toolbar .btn-secondary:hover {
+    background: #343a49;
+    color: #fff;
+}
+
+.playground-toolbar .btn-success {
+    background: #0ea56a;
+    color: #fff;
+    border-color: #16ba7b;
+}
+
+.playground-toolbar .btn-success:hover {
+    background: #11b274;
+    transform: none;
+    box-shadow: none;
+}
+
+.playground-hint {
+    color: #9aa3b5;
+    font-size: 12px;
+    letter-spacing: 0.2px;
+}
+
+.playground-root {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    display: flex;
+    overflow: hidden;
+    border: 1px solid #2d313c;
+    border-radius: 10px;
+    background: #1a1d24;
+    box-shadow: 0 12px 36px rgba(0, 0, 0, 0.35);
+}
+
+.playground-root.layout-bottom {
+    flex-direction: column;
+}
+
+.playground-root.layout-right {
+    flex-direction: row;
+}
+
+.pg-editors-wrap {
+    min-height: 0;
+    min-width: 0;
+    display: flex;
+    flex: 1;
+}
+
+.pg-preview-wrap {
+    min-height: 0;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    background: var(--bg-primary);
+}
+
+.pg-editor-card {
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 0;
+    border-right: 1px solid #2e3441;
+    background: #1b1f27;
+}
+
+.playground-root.layout-right .pg-editor-card:last-child,
+.playground-root.layout-bottom .pg-editor-card:last-child {
+    border-right: none;
+}
+
+.pg-pane-header {
+    padding: 9px 12px;
+    font-size: 12px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.7px;
+    color: #c7cfdd;
+    background: #252b36;
+    border-bottom: 1px solid #343b4a;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pg-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.pg-dot.html { background: #f97316; }
+.pg-dot.css { background: #3b82f6; }
+.pg-dot.js { background: #facc15; }
+.pg-dot.output { background: #22c55e; }
+
+.pg-editor-card textarea {
+    display: none;
+}
+
+.pg-editor-card .CodeMirror {
+    flex: 1;
+    height: 100%;
+    min-height: 220px;
+    font-size: 15px;
+    background: #1b1f27;
+    color: #f3f4f6;
+}
+
+.playground-shell .task-panel {
+    margin: 0;
+    padding: 14px 16px 10px;
+    background: transparent;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.playground-shell .task-header {
+    margin-bottom: 10px;
+}
+
+.playground-shell .task-title {
+    color: #cdd6f4;
+    font-size: 22px;
+    letter-spacing: 0.01em;
+}
+
+.playground-shell .task-difficulty.beginner {
+    background: #1f2937;
+    color: #a6adc8;
+    border: 1px solid #45475a;
+}
+
+.playground-shell .lesson-structure {
+    display: grid;
+    gap: 10px;
+}
+
+.playground-shell .lesson-part {
+    background: #181825;
+    color: #cdd6f4;
+    border: 1px solid #313244;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.playground-shell .lesson-label {
+    margin: 0 0 6px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #89b4fa;
+}
+
+.playground-shell .lesson-text {
+    margin: 0;
+    color: #bac2de;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.playground-shell .theory-part {
+    border-color: #74c7ec;
+    background: linear-gradient(180deg, rgba(116, 199, 236, 0.16), rgba(24, 24, 37, 0.95));
+}
+
+.playground-shell .theory-part .lesson-label {
+    color: #74c7ec;
+}
+
+.playground-shell .lesson-checkpoints {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: grid;
+    gap: 8px;
+}
+
+.playground-shell .lesson-checkpoints li {
+    color: #cdd6f4;
+    font-size: 14px;
+    line-height: 1.5;
+    padding-left: 28px;
+    position: relative;
+}
+
+.playground-shell .lesson-checkpoints li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 5px;
+    border: 1px solid #89dceb;
+    background: linear-gradient(180deg, rgba(137, 220, 235, 0.18), rgba(30, 30, 46, 0.5));
+    box-shadow: inset 0 0 0 2px rgba(24, 24, 37, 0.9);
+}
+
+.playground-shell .hint-reveal {
+    border: 1px solid #f9e2af;
+    border-radius: 10px;
+    background: rgba(249, 226, 175, 0.08);
+    overflow: hidden;
+}
+
+.playground-shell .hint-reveal summary {
+    list-style: none;
+    cursor: pointer;
+    padding: 10px 12px;
+    color: #f9e2af;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.playground-shell .hint-reveal summary::-webkit-details-marker {
+    display: none;
+}
+
+.playground-shell .hint-reveal[open] summary {
+    border-bottom: 1px solid rgba(249, 226, 175, 0.32);
+}
+
+.playground-shell .hint-reveal-content {
+    padding: 10px 12px 12px;
+    color: #f5e0dc;
+    font-size: 14px;
+    line-height: 1.55;
+}
+
+.lesson-panel-footer {
+    position: sticky;
+    bottom: 0;
+    margin-top: auto;
+    padding: 12px 16px 14px;
+    background: linear-gradient(180deg, rgba(30, 30, 46, 0), rgba(30, 30, 46, 0.95) 28%, rgba(30, 30, 46, 1));
+    border-top: 1px solid #313244;
+}
+
+.lesson-run-tests {
+    width: 100%;
+    justify-content: center;
+    font-weight: 600;
+}
+
+#pgPreviewFrame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #fff;
+}
+
+.gutter {
+    background: #303644;
+    border: 0;
+    opacity: 0.9;
+    transition: background 140ms ease;
+}
+
+.gutter:hover {
+    background: #4b6bff;
+}
+
+.gutter.gutter-horizontal {
+    cursor: col-resize;
+    width: 8px !important;
+}
+
+.gutter.gutter-vertical {
+    cursor: row-resize;
+    height: 8px !important;
+}
+
+body.playground-focus-mode .sidebar,
+body.playground-focus-mode .top-header {
+    display: none !important;
+}
+
+body.playground-focus-mode .main-content {
+    margin-left: 0 !important;
+}
+
+body.playground-focus-mode .playground-shell {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+    height: 100vh;
+    padding: 8px;
+    background: #111318;
+}
+
+body.playground-focus-mode .lesson-panel {
+    display: none;
+}
+
+@media (max-width: 980px) {
+    .playground-root.layout-right {
+        flex-direction: column;
+    }
+
+    .pg-editors-wrap {
+        flex-direction: column;
+    }
+
+    .playground-toolbar {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .playground-shell .task-title {
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 768px) {
+    .lesson-workspace {
+        flex-direction: column;
+    }
+
+    .lesson-panel {
+        width: 100%;
+        flex-basis: auto;
+        max-height: 42vh;
+    }
+}

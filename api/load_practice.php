@@ -44,7 +44,7 @@ try {
         ]);
     }
     
-} catch (PDOException $e) {
+} catch (Throwable $e) {
     error_log("Load Practice Error: " . $e->getMessage());
     
     echo json_encode([

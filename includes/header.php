@@ -6,7 +6,7 @@
     <title><?php echo $pageTitle ?? 'CodeDojo - Learn HTML by Coding'; ?></title>
     
     <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥋</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F94B;</text></svg>">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,6 +18,9 @@
     <!-- CSS Files -->
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/themes.css">
+    <?php if (isset($extraHead) && is_string($extraHead)): ?>
+        <?php echo $extraHead; ?>
+    <?php endif; ?>
 </head>
 <body>
     <?php
