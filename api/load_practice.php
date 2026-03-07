@@ -33,7 +33,7 @@ try {
         
     } else {
         // Load all practices
-        $sql = "SELECT * FROM user_practice ORDER BY created_at DESC";
+        $sql = "SELECT * FROM user_practice ORDER BY updated_at DESC, created_at DESC";
         $stmt = $pdo->query($sql);
         $practices = $stmt->fetchAll();
         
@@ -44,7 +44,7 @@ try {
         ]);
     }
     
-} catch (PDOException $e) {
+} catch (Throwable $e) {
     error_log("Load Practice Error: " . $e->getMessage());
     
     echo json_encode([

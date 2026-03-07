@@ -6,7 +6,7 @@
     <title><?php echo $pageTitle ?? 'CodeDojo - Learn HTML by Coding'; ?></title>
     
     <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🥋</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#x1F94B;</text></svg>">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,6 +18,9 @@
     <!-- CSS Files -->
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/themes.css">
+    <?php if (isset($extraHead) && is_string($extraHead)): ?>
+        <?php echo $extraHead; ?>
+    <?php endif; ?>
 </head>
 <body>
     <?php
@@ -35,7 +38,7 @@
     
     <div class="app-container">
         <!-- Sidebar Navigation -->
-        <aside class="sidebar">
+        <aside id="sidebarNav" class="sidebar">
             <div class="sidebar-header">
                 <a href="index.php" class="logo">
                     <span class="material-icons">school</span>
@@ -53,32 +56,11 @@
                     </a>
                     <a href="editor.php" class="nav-item <?php echo ($currentPage ?? '') === 'editor' ? 'active' : ''; ?>">
                         <span class="material-icons">code</span>
-                        <span>Code Editor</span>
-                    </a>
-                    <a href="lessons.php" class="nav-item <?php echo ($currentPage ?? '') === 'lessons' ? 'active' : ''; ?>">
-                        <span class="material-icons">book</span>
-                        <span>Lessons</span>
+                        <span>Editor</span>
                     </a>
                     <a href="my_practice.php" class="nav-item <?php echo ($currentPage ?? '') === 'practice' ? 'active' : ''; ?>">
                         <span class="material-icons">folder</span>
-                        <span>My Practice</span>
-                    </a>
-                </div>
-                
-                <!-- Quick Start Templates -->
-                <div class="nav-section">
-                    <div class="nav-section-title">Quick Start</div>
-                    <a href="editor.php?template=button" class="nav-item">
-                        <span class="material-icons">smart_button</span>
-                        <span>Button</span>
-                    </a>
-                    <a href="editor.php?template=card" class="nav-item">
-                        <span class="material-icons">crop_portrait</span>
-                        <span>Card</span>
-                    </a>
-                    <a href="editor.php?template=form" class="nav-item">
-                        <span class="material-icons">edit_note</span>
-                        <span>Form</span>
+                        <span>Projects</span>
                     </a>
                 </div>
                 
@@ -142,11 +124,16 @@
             </nav>
         </aside>
         
+        <div id="sidebarOverlay" class="sidebar-overlay" aria-hidden="true"></div>
+
         <!-- Main Content -->
         <main class="main-content">
             <!-- Top Header -->
             <header class="top-header">
                 <div class="header-left">
+                    <button id="menuToggle" class="menu-toggle" type="button" aria-label="Open menu" aria-controls="sidebarNav" aria-expanded="false">
+                        <span class="material-icons">menu</span>
+                    </button>
                     <h1><?php echo $pageTitle ?? 'CodeDojo'; ?></h1>
                 </div>
                 <div class="header-right">

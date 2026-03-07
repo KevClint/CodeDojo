@@ -8,7 +8,7 @@
 define('DB_HOST', 'localhost');
 define('DB_USER', 'root');           // Default XAMPP username
 define('DB_PASS', '');               // Default XAMPP password (empty)
-define('DB_NAME', 'codedojo');
+define('DB_NAME', 'codedojo2');
 define('DB_CHARSET', 'utf8mb4');
 
 // Create database connection
@@ -25,14 +25,9 @@ function getDBConnection() {
         return $pdo;
         
     } catch (PDOException $e) {
-        // Log error (in production, log to file instead)
+        // Let callers decide whether to render HTML or JSON.
         error_log("Database Connection Error: " . $e->getMessage());
-        
-        // User-friendly error message
-        die(json_encode([
-            'success' => false,
-            'message' => 'Database connection failed. Please check your configuration.'
-        ]));
+        throw $e;
     }
 }
 

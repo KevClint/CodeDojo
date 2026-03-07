@@ -1,6 +1,6 @@
 /**
- * CodeDojo - Practice Management
- * Handles loading, editing, and deleting saved practices
+ * CodeDojo - Project Management
+ * Handles loading, editing, and deleting saved projects
  */
 
 class PracticeManager {
@@ -8,81 +8,146 @@ class PracticeManager {
         this.practiceGrid = document.getElementById('practiceGrid');
         this.init();
     }
-    
+
     init() {
         this.loadPractices();
     }
-    
-    /**
-     * Load all saved practices
-     */
+
     async loadPractices() {
         try {
             const response = await fetch('api/load_practice.php');
             const result = await response.json();
-            
-            if (result.success && result.practices) {
+
+            if (result.success && result.practices && result.practices.length > 0) {
                 this.displayPractices(result.practices);
             } else {
                 this.showEmptyState();
             }
-            
         } catch (error) {
             console.error('Error loading practices:', error);
-            this.showError('Failed to load practices');
+            this.showError('Failed to load projects');
         }
     }
-    
-    /**
-     * Display practices in grid
-     */
+
     displayPractices(practices) {
         if (!this.practiceGrid) return;
-        
+
         this.practiceGrid.innerHTML = '';
-        
-        practices.forEach(practice => {
+
+        practices.forEach((practice) => {
             const card = this.createPracticeCard(practice);
             this.practiceGrid.appendChild(card);
         });
     }
-    
-    /**
-     * Create practice card element
-     */
+
+    parseSavedProject(htmlCode) {
+        const defaultResult = {
+            html: htmlCode || '',
+            css: '',
+            js: '',
+            renderedHtml: htmlCode || ''
+        };
+
+        if (!htmlCode || typeof htmlCode !== 'string') {
+            return defaultResult;
+        }
+
+        const markerMatch = htmlCode.match(/<!--\s*CODEDOJO_PEN_V1:([A-Za-z0-9+/=]+)\s*-->/i);
+        if (markerMatch) {
+            try {
+                const decoded = decodeURIComponent(escape(window.atob(markerMatch[1])));
+                const payload = JSON.parse(decoded);
+
+                if (
+                    payload &&
+                    typeof payload.html === 'string' &&
+                    typeof payload.css === 'string' &&
+                    typeof payload.js === 'string'
+                ) {
+                    return {
+                        html: payload.html,
+                        css: payload.css,
+                        js: payload.js,
+                        renderedHtml: this.buildPreviewDocument(payload.html, payload.css, payload.js)
+                    };
+                }
+            } catch (error) {
+                console.warn('Failed to parse project payload:', error);
+            }
+        }
+
+        const bodyMatch = htmlCode.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+        if (bodyMatch && bodyMatch[1]) {
+            defaultResult.html = bodyMatch[1].trim();
+        }
+
+        const cssMatch = htmlCode.match(/<style[^>]*>([\s\S]*?)<\/style>/i);
+        if (cssMatch && cssMatch[1]) {
+            defaultResult.css = cssMatch[1].trim();
+        }
+
+        const jsMatch = htmlCode.match(/<script[^>]*>([\s\S]*?)<\/script>/i);
+        if (jsMatch && jsMatch[1]) {
+            defaultResult.js = jsMatch[1].trim();
+        }
+
+        return defaultResult;
+    }
+
+    buildPreviewDocument(html, css, js) {
+        const safeJs = js.replace(/<\/script>/gi, '<\\/script>');
+        return `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>${css}</style>
+</head>
+<body>
+${html}
+<script>${safeJs}<\/script>
+</body>
+</html>`;
+    }
+
     createPracticeCard(practice) {
         const card = document.createElement('div');
         card.className = 'practice-card';
-        
-        // Format date
-        const date = new Date(practice.created_at);
+
+        const date = new Date(practice.updated_at || practice.created_at);
         const formattedDate = date.toLocaleDateString('en-US', {
             year: 'numeric',
             month: 'short',
             day: 'numeric'
         });
-        
-        // Truncate code for preview
-        const codePreview = this.truncateCode(practice.html_code, 100);
-        
+
+        const parsed = this.parseSavedProject(practice.html_code);
+        const htmlPreview = this.truncateCode(parsed.html.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim(), 110);
+        const cssLines = parsed.css ? parsed.css.split('\n').length : 0;
+        const jsLines = parsed.js ? parsed.js.split('\n').length : 0;
+
         card.innerHTML = `
             <div class="practice-card-header">
                 <h3 class="practice-card-title">${this.escapeHtml(practice.title)}</h3>
                 <span class="practice-card-date">${formattedDate}</span>
             </div>
-            
-            <div class="practice-card-preview">
-                ${this.escapeHtml(codePreview)}
+
+            <div class="practice-card-preview">${this.escapeHtml(htmlPreview || 'No preview content yet.')}</div>
+
+            <div class="practice-card-meta">
+                <span>HTML</span>
+                <span>${cssLines} CSS lines</span>
+                <span>${jsLines} JS lines</span>
             </div>
-            
+
             <div class="practice-card-actions">
                 <button class="btn btn-primary btn-small" onclick="practiceManager.editPractice(${practice.id})">
                     <span class="material-icons">edit</span>
-                    Edit
+                    Open
                 </button>
                 <button class="btn btn-secondary btn-small" onclick="practiceManager.viewPreview(${practice.id})">
                     <span class="material-icons">visibility</span>
-                    View
+                    Preview
                 </button>
                 <button class="btn btn-danger btn-small" onclick="practiceManager.deletePractice(${practice.id})">
                     <span class="material-icons">delete</span>
@@ -90,54 +155,44 @@ class PracticeManager {
                 </button>
             </div>
         `;
-        
+
         return card;
     }
-    
-    /**
-     * Edit a practice - redirect to editor
-     */
+
     editPractice(id) {
         window.location.href = `editor.php?practice=${id}`;
     }
-    
-    /**
-     * View practice preview in modal
-     */
+
     async viewPreview(id) {
         try {
             const response = await fetch(`api/load_practice.php?id=${id}`);
             const result = await response.json();
-            
+
             if (result.success && result.practice) {
                 this.showPreviewModal(result.practice);
             }
-            
         } catch (error) {
             console.error('Error loading practice:', error);
         }
     }
-    
-    /**
-     * Show preview modal
-     */
+
     showPreviewModal(practice) {
-        // Create modal
+        const parsed = this.parseSavedProject(practice.html_code);
+
         const modal = document.createElement('div');
         modal.className = 'modal-overlay';
         modal.innerHTML = `
-            <div class="modal-content" style="max-width: 800px; background: var(--bg-primary); border-radius: var(--border-radius-lg); padding: var(--spacing-lg);">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md);">
+            <div class="modal-content" style="max-width: 920px; background: var(--bg-primary); border-radius: var(--border-radius-lg); padding: var(--spacing-lg); width: 100%;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: var(--spacing-md); gap: var(--spacing-sm);">
                     <h2 style="margin: 0; color: var(--text-primary);">${this.escapeHtml(practice.title)}</h2>
                     <button class="btn btn-secondary" onclick="this.closest('.modal-overlay').remove()">
                         <span class="material-icons">close</span>
                     </button>
                 </div>
-                <iframe style="width: 100%; height: 500px; border: 1px solid var(--border-color); border-radius: var(--border-radius);"></iframe>
+                <iframe style="width: 100%; height: 540px; border: 1px solid var(--border-color); border-radius: var(--border-radius);"></iframe>
             </div>
         `;
-        
-        // Add modal styles
+
         modal.style.cssText = `
             position: fixed;
             top: 0;
@@ -151,100 +206,86 @@ class PracticeManager {
             z-index: 1000;
             padding: var(--spacing-lg);
         `;
-        
+
         document.body.appendChild(modal);
-        
-        // Write code to iframe
+
         const iframe = modal.querySelector('iframe');
         const doc = iframe.contentDocument || iframe.contentWindow.document;
         doc.open();
-        doc.write(practice.html_code);
+        doc.write(parsed.renderedHtml);
         doc.close();
-        
-        // Close on overlay click
+
         modal.addEventListener('click', (e) => {
             if (e.target === modal) {
                 modal.remove();
             }
         });
     }
-    
-    /**
-     * Delete a practice
-     */
+
     async deletePractice(id) {
-        if (!confirm('Are you sure you want to delete this practice? This cannot be undone.')) {
+        if (!confirm('Are you sure you want to delete this project? This cannot be undone.')) {
             return;
         }
-        
+
         try {
             const formData = new FormData();
             formData.append('id', id);
-            
+
             const response = await fetch('api/delete_practice.php', {
                 method: 'POST',
                 body: formData
             });
-            
+
             const result = await response.json();
-            
+
             if (result.success) {
-                this.showFeedback('Practice deleted successfully', 'success');
-                this.loadPractices(); // Reload grid
+                this.showFeedback('Project deleted', 'success');
+                this.loadPractices();
             } else {
                 this.showFeedback(result.message || 'Failed to delete', 'danger');
             }
-            
         } catch (error) {
             console.error('Delete error:', error);
-            this.showFeedback('Error deleting practice', 'danger');
+            this.showFeedback('Error deleting project', 'danger');
         }
     }
-    
-    /**
-     * Show empty state
-     */
+
     showEmptyState() {
         if (!this.practiceGrid) return;
-        
+
         this.practiceGrid.innerHTML = `
             <div class="empty-state" style="grid-column: 1 / -1;">
                 <span class="material-icons" style="font-size: 64px; color: var(--text-muted);">code_off</span>
-                <h3>No practices yet</h3>
-                <p>Start coding to create your first practice!</p>
+                <h3>No saved projects yet</h3>
+                <p>Start in the editor, then Save Project.</p>
                 <a href="editor.php" class="btn btn-primary">
                     <span class="material-icons">add</span>
-                    Start Coding
+                    Open Editor
                 </a>
             </div>
         `;
     }
-    
-    /**
-     * Utility: Truncate code for preview
-     */
+
     truncateCode(code, maxLength) {
+        if (!code) {
+            return '';
+        }
+
         if (code.length <= maxLength) return code;
-        return code.substring(0, maxLength) + '...';
+        return `${code.substring(0, maxLength)}...`;
     }
-    
-    /**
-     * Utility: Escape HTML for safe display
-     */
+
     escapeHtml(text) {
         const div = document.createElement('div');
         div.textContent = text;
         return div.innerHTML;
     }
-    
-    /**
-     * Show feedback message
-     */
+
     showFeedback(message, type = 'info') {
         const toast = document.createElement('div');
         toast.className = `feedback-toast feedback-${type}`;
         toast.textContent = message;
-        
+
         toast.style.cssText = `
             position: fixed;
             top: 20px;
@@ -256,34 +297,31 @@ class PracticeManager {
             animation: slideIn 0.3s ease;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         `;
-        
+
         const colors = {
             success: 'background: #10b981; color: white;',
             danger: 'background: #ef4444; color: white;',
             warning: 'background: #f59e0b; color: white;',
             info: 'background: #3b82f6; color: white;'
         };
-        
+
         toast.style.cssText += colors[type] || colors.info;
-        
+
         document.body.appendChild(toast);
-        
+
         setTimeout(() => {
             toast.style.animation = 'slideOut 0.3s ease';
             setTimeout(() => toast.remove(), 300);
         }, 3000);
     }
-    
-    /**
-     * Show error message
-     */
+
     showError(message) {
         if (!this.practiceGrid) return;
-        
+
         this.practiceGrid.innerHTML = `
             <div class="empty-state" style="grid-column: 1 / -1;">
                 <span class="material-icons" style="font-size: 64px; color: var(--color-danger);">error_outline</span>
-                <h3>Error Loading Practices</h3>
+                <h3>Error Loading Projects</h3>
                 <p>${message}</p>
                 <button class="btn btn-primary" onclick="location.reload()">
                     <span class="material-icons">refresh</span>
@@ -294,7 +332,6 @@ class PracticeManager {
     }
 }
 
-// Initialize practice manager when DOM is ready
 let practiceManager;
 document.addEventListener('DOMContentLoaded', () => {
     if (document.getElementById('practiceGrid')) {
